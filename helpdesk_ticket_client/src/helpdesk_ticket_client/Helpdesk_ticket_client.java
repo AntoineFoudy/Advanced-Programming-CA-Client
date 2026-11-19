@@ -52,6 +52,13 @@ public class Helpdesk_ticket_client {
                 if (clientMessage.isEmpty()) {
                     continue;
                 }
+                
+                // Imported command handaling
+                if(clientMessage.trim().toLowerCase().startsWith("import;")) {
+                    String url = clientMessage.substring("import;".length()).trim();
+                    importTickets(url, in, out);
+                    continue;
+                }
 
                 // Sends message to Server and reads response
                 out.println(clientMessage);
@@ -115,7 +122,6 @@ public class Helpdesk_ticket_client {
                         
                         // Check if line is empty
                         if(line.trim().isEmpty()) {
-                            imported -= 1;
                             continue;
                         }
                         
@@ -146,7 +152,20 @@ public class Helpdesk_ticket_client {
                         // Create the command to be sent to the server
                         String sendCommand = "open; " + command[0] + "; " + name + "; " + command[1] + "; " + command[2];
                         
+                        // Sending and reciveing messages to the server
+                        out.println(sendCommand);
+                        System.out.println(sendCommand);
                         
+                        String serverResponse = in.readLine();
+                        
+                        if(serverResponse.trim().startsWith("InvalidCommandException")) {
+                            skipped += 1;
+                        }
+                        else {
+                            imported += 1;
+                        }
+                        
+                        System.out.println(serverResponse);
                         
 
                     }
@@ -163,6 +182,8 @@ public class Helpdesk_ticket_client {
             if(conn != null) {
                 conn.disconnect();
             }
+            
+            System.out.println("Imported: " + imported + "; Skipped: " + skipped);
         }
     }
 
