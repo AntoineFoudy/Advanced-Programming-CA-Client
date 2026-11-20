@@ -45,6 +45,7 @@ public class Helpdesk_ticket_client {
             String serverMessage;
 
             while (true) {
+                System.out.print(">");
                 clientMessage = userInput.nextLine().trim();
 
                 // Skips current loop iteration if client enters nothing
@@ -66,6 +67,7 @@ public class Helpdesk_ticket_client {
 
                 // Ends loop if client sends "STOP" and server responds with "Terminate
                 if (serverMessage.equals("TERMINATE")) {
+                    System.out.println("Connection closed");
                     break;
                 }
             }
