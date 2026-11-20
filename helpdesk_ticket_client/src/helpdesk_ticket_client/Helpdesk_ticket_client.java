@@ -14,7 +14,6 @@ import java.net.Socket;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.Scanner;
 
 /**
@@ -71,36 +70,43 @@ public class Helpdesk_ticket_client {
                 }
             }
 
-        } catch (Exception e) {
+        } catch (RuntimeException | IOException e) {
             System.out.println("Error: " + e);
         }
     }
-
+    
+    
+    // Method for handling the import; command
     private static void importTickets(String ticketURL, BufferedReader in, PrintWriter out) {
         int imported = 0;
         int skipped = 0;
         HttpURLConnection conn = null;
-
+        
+        // Try to connect to the provided URL
         try {
             URL url = new URI(ticketURL).toURL();
-
+            
+            // HttpURLConnection to connect to the server hosting the .txt file
             conn = (HttpURLConnection) url.openConnection();
-
+            
             conn.setRequestMethod("GET");
             
             conn.setConnectTimeout(10000);
             conn.setReadTimeout(10000);
-
+            
+            // Check if status code is not OK
             if (conn.getResponseCode() != 200) {
                 throw new IOException("Could not import tickets: HTTP Status " +conn.getResponseCode());
             } else {
+                // Read the body
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
 
                     String name = null;
                     String line;
-                    int lineCount = 0;
+                    int lineCount = 0; // Allow system to display which line is causing an issue/skipped
                     String[] command;
-
+                    
+                    // Start going throw each line
                     while ((line = br.readLine()) != null) {
                         lineCount += 1;
 
@@ -158,6 +164,18 @@ public class Helpdesk_ticket_client {
                         
                         String serverResponse = in.readLine();
                         
+                        // Check connection to server is still active
+                        if(serverResponse == null) {
+                            System.out.println("Server connection is closed");
+                            break;
+                        }
+                        
+                        if(serverResponse.trim().equals("TERMINATE")) {
+                            System.out.println("Server closed the connection");
+                            break;
+                        }
+                        
+                        // Use the server to validate commands that were sent but were invalid in the eyes of the entire system
                         if(serverResponse.trim().startsWith("InvalidCommandException")) {
                             skipped += 1;
                         }
@@ -178,6 +196,8 @@ public class Helpdesk_ticket_client {
             System.out.println("URISyntaxException: " + e.getMessage());
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("URL provided is invalid: " + ticketURL);
         } finally {
             if(conn != null) {
                 conn.disconnect();
