@@ -71,7 +71,9 @@ public class Helpdesk_ticket_client {
             }
 
         } catch (RuntimeException | IOException e) {
-            System.out.println("Error: " + e);
+            System.out.println("Error: " + e.toString());
+        } catch(Exception e) {
+            System.out.println("Error: " + e.toString());
         }
     }
     
@@ -170,10 +172,6 @@ public class Helpdesk_ticket_client {
                             break;
                         }
                         
-                        if(serverResponse.trim().equals("TERMINATE")) {
-                            System.out.println("Server closed the connection");
-                            break;
-                        }
                         
                         // Use the server to validate commands that were sent but were invalid in the eyes of the entire system
                         if(serverResponse.trim().startsWith("InvalidCommandException")) {
@@ -191,13 +189,15 @@ public class Helpdesk_ticket_client {
             }
 
         } catch (MalformedURLException e) {
-            System.out.println("MalformedURLException: " + e.getMessage());
+            System.out.println("MalformedURLException: " + e.toString());
         } catch (URISyntaxException e) {
-            System.out.println("URISyntaxException: " + e.getMessage());
+            System.out.println("URISyntaxException: " + e.toString());
         } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+            System.out.println("IOException: " + e.toString());
         } catch (IllegalArgumentException e) {
             System.out.println("URL provided is invalid: " + ticketURL);
+        } catch (Exception e) {
+            System.out.println("Error : " + e.toString());
         } finally {
             if(conn != null) {
                 conn.disconnect();
